@@ -1,7 +1,7 @@
 # Audit-Trail
 VBA script for tracking information on changes to excel files.
 
-This was my first medium-sized VBA project created for my student summer position with BioVectra Inc.
+This was my first medium-sized VBA project created for my summer student position with BioVectra Inc.
 
 My manager was looking for more detailed/user-accessible information as I work with a lot of chemists who don't necessarily have the strongest computer skills and knowledge.
 
