@@ -1,27 +1,53 @@
 'initiate global variables for storing values
 Dim oldValue As String
 Dim oldAddress As String
+Dim numFormat As String
 
 'sheet update function
 Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
 Dim sSheetName As String
+
 'define active sheet
 sSheetName = ActiveSheet.Name
+'skip error when deleting multiple cells
+If Target.Count > 1 Then Exit Sub
+'do not track filling empty cells
+If oldValue = "" Then Exit Sub
 'do not track changes to Log Details sheet
-If ActiveSheet.Name <> "Log Details" Then
-'if the value doesn't change, exit script
+If sSheetName <> "Log Details" Then
+'if the value doesn't change exit script
 If Target.Value = oldValue Then Exit Sub
+'store the top cell of column
+curHeader = Target.EntireColumn.Cells(1, 1).Value
+
 Application.EnableEvents = False
-'set up values into correct location
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = ActiveSheet.Name & " - " & Target.Address(0, 0)
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = oldValue
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).Value = Target.Value
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).Value = Environ("username")
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Now
+
+'store ranges of log details
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = sSheetName & " - " & Target.Address(0, 0)
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = curHeader
+'format value to date if needed, otherwise general will suffice
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).Value = oldValue
+If VarType(Target.Value) <> 7 Then
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "General"
+Else
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "dd/mm/yyyy;@"
+End If
+'format value to date if needed, otherwise general will suffice
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).Value = Target.Value
+If VarType(Target.Value) <> 7 Then
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "General"
+Else
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "dd/mm/yyyy;@"
+End If
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Environ("username")
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5).Value = Now
+
 'set up hyperlink
-Sheets("Log Details").Hyperlinks.Add Anchor:=Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5), Address:="", SubAddress:="'" & sSheetName & "'!" & oldAddress, TextToDisplay:=oldAddress
-Sheets("Log Details").Columns("A:D").AutoFit
+Sheets("Log Details").Hyperlinks.Add Anchor:=Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 6), Address:="", SubAddress:="'" & sSheetName & "'!" & oldAddress, TextToDisplay:=oldAddress
+Sheets("Log Details").Columns("A:G").AutoFit
+
 Application.EnableEvents = True
+
 End If
 End Sub
 
