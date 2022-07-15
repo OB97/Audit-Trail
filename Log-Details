@@ -9,22 +9,20 @@ Dim sSheetName As String
 
 'define active sheet
 sSheetName = ActiveSheet.Name
-'skip error when deleting multiple cells
+'if editing multiple cells exit script (avoid error)
 If Target.Count > 1 Then Exit Sub
-'do not track filling empty cells
+'if filling in empty cell exit script
 If oldValue = "" Then Exit Sub
-'do not track changes to Log Details sheet
-If sSheetName <> "Log Details" Then
 'if the value doesn't change exit script
 If Target.Value = oldValue Then Exit Sub
-'store the top cell of column
-curHeader = Target.EntireColumn.Cells(1, 1).Value
+'do not track changes to Log Details sheet
+If sSheetName <> "Log Details" Then
 
 Application.EnableEvents = False
 
 'set up values into correct ranges
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = sSheetName & " - " & Target.Address(0, 0)
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = curHeader
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = Target.EntireColumn.Cells(1, 1).Value
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Environ("username")
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5).Value = Now
 
@@ -57,8 +55,8 @@ Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Ra
 On Error Resume Next
 'doesn't run script if selecting more than 1 cell
 If Target.Count > 1 Then Exit Sub
+'if selecting 1 cell update global variables
 If Target.Count = 1 Then
-'update global variables
 oldValue = Target.Value
 End If
 oldAddress = Target.Address
