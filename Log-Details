@@ -22,25 +22,25 @@ curHeader = Target.EntireColumn.Cells(1, 1).Value
 
 Application.EnableEvents = False
 
-'store ranges of log details
+'set up values into correct ranges
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = sSheetName & " - " & Target.Address(0, 0)
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = curHeader
-'format value to date if needed, otherwise general will suffice
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Environ("username")
+Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5).Value = Now
+
+'format values to date if needed, otherwise general will suffice
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).Value = oldValue
 If VarType(Target.Value) <> 7 Then
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "General"
 Else
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "dd/mm/yyyy;@"
 End If
-'format value to date if needed, otherwise general will suffice
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).Value = Target.Value
 If VarType(Target.Value) <> 7 Then
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "General"
 Else
 Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "dd/mm/yyyy;@"
 End If
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Environ("username")
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5).Value = Now
 
 'set up hyperlink
 Sheets("Log Details").Hyperlinks.Add Anchor:=Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 6), Address:="", SubAddress:="'" & sSheetName & "'!" & oldAddress, TextToDisplay:=oldAddress
