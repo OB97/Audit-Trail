@@ -1,7 +1,6 @@
 'initiate global variables for storing values
 Dim oldValue As String
 Dim oldAddress As String
-Dim numFormat As String
 
 'sheet update function
 Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
