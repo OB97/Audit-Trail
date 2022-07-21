@@ -17,6 +17,7 @@ If Target.Value = oldValue Then Exit Sub
 'do not track changes to Log Details sheet
 If sSheetName <> "Log Details" Then
 
+'halt all external events during script
 Application.EnableEvents = False
 
 'set up values into correct ranges
@@ -43,12 +44,19 @@ End If
 Sheets("Log Details").Hyperlinks.Add Anchor:=Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 6), Address:="", SubAddress:="'" & sSheetName & "'!" & oldAddress, TextToDisplay:=oldAddress
 Sheets("Log Details").Columns("A:G").AutoFit
 
+'resume external events
 Application.EnableEvents = True
 
+'formatting log details sheet
+Else
+Sheets("Log Details").Columns("H").WrapText = True
+Sheets("Log Details").Columns("H").Rows.AutoFit
+Sheets("Log Details").Rows.VerticalAlignment = xlVAlignCenter
 End If
+
 End Sub
 
-'cell selection function
+'cell selection function, runs after update function (oldValue and oldAddress updated after cell values are changed)
 Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Range)
 'skips error if selecting multiple cells (doesn't end script)
 On Error Resume Next
