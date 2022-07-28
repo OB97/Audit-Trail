@@ -8,51 +8,97 @@ Dim sSheetName As String
 
 'define active sheet
 sSheetName = ActiveSheet.Name
-'if editing multiple cells exit script (avoid error)
-If Target.Count > 1 Then Exit Sub
-'if filling in empty cell exit script
-If oldValue = "" Then Exit Sub
-'if the value doesn't change exit script
-If Target.Value = oldValue Then Exit Sub
-'do not track changes to Log Details sheet
-If sSheetName <> "Log Details" Then
 
-'halt all external events during script
-Application.EnableEvents = False
-
-'set up values into correct ranges
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = sSheetName & " - " & Target.Address(0, 0)
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = Target.EntireColumn.Cells(1, 1).Value
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Environ("username")
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5).Value = Now
-
-'format values to date if needed, otherwise general will suffice
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).Value = oldValue
-If VarType(Target.Value) <> 7 Then
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "General"
+'if editing multiple cells
+If Target.Cells.Count > 1 Then
+    
+    'do not track changes to Log Details sheet
+    If sSheetName <> "Log Details" Then
+    
+        'halt all external events during script
+        Application.EnableEvents = False
+        
+        'set values into correct ranges, target.address takes the string range instead of string origin cell
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = sSheetName & " - " & Target.Address(False, False)
+        
+        'if a single column has mulitple cells edited, record column header, otherwise print string
+        If Target.Columns.Count > 1 Then
+            Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = "Multiple Columns Edited"
+        End If
+        
+        If Target.Columns.Count = 1 Then
+            Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = Target.EntireColumn.Cells(1, 1).Value
+        End If
+        
+        'struggling to find a way to record multiple value changes at once, this is my solution
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).Value = "Multiple Cells Changed"
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "General"
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).Value = "Multiple Cells Changed"
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "General"
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Environ("username")
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5).Value = Now
+        
+        'set up hyperlink
+        Sheets("Log Details").Hyperlinks.Add Anchor:=Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 6), Address:="", SubAddress:="'" & sSheetName & "'!" & oldAddress, TextToDisplay:=oldAddress
+        'format updated cells
+        Sheets("Log Details").Columns("A:G").AutoFit
+        
+        'resume external events
+        Application.EnableEvents = True
+        
+    End If
+    
+'if editing a single cell
 Else
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "dd/mm/yyyy;@"
+
+    'if filling in empty cell exit script
+    If oldValue = "" Then Exit Sub
+    'if the value doesn't change exit script
+    If Target.Value = oldValue Then Exit Sub
+
+    'do not track changes to Log Details sheet
+    If sSheetName <> "Log Details" Then
+
+        'halt all external events during script
+        Application.EnableEvents = False
+
+        'set up values into correct ranges
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = sSheetName & " - " & Target.Address(0, 0)
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 1).Value = Target.EntireColumn.Cells(1, 1).Value
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 4).Value = Environ("username")
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 5).Value = Now
+
+        'format values to general unless they're in date format
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).Value = oldValue
+        If VarType(Target.Value) <> 7 Then
+            Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "General"
+        Else
+            Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 2).NumberFormat = "dd/mm/yyyy;@"
+        End If
+
+        Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).Value = Target.Value
+        If VarType(Target.Value) <> 7 Then
+            Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "General"
+        Else
+            Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "dd/mm/yyyy;@"
+        End If
+
+        'set up hyperlink
+        Sheets("Log Details").Hyperlinks.Add Anchor:=Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 6), Address:="", SubAddress:="'" & sSheetName & "'!" & oldAddress, TextToDisplay:=oldAddress
+        'format updated cells
+        Sheets("Log Details").Columns("A:G").AutoFit
+
+        'resume external events
+        Application.EnableEvents = True
+        
+    End If
+
 End If
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).Value = Target.Value
-If VarType(Target.Value) <> 7 Then
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "General"
-Else
-Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 3).NumberFormat = "dd/mm/yyyy;@"
-End If
 
-'set up hyperlink
-Sheets("Log Details").Hyperlinks.Add Anchor:=Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(0, 6), Address:="", SubAddress:="'" & sSheetName & "'!" & oldAddress, TextToDisplay:=oldAddress
-Sheets("Log Details").Columns("A:G").AutoFit
-
-'resume external events
-Application.EnableEvents = True
-
-'formatting log details sheet
-Else
+'format log details sheet
 Sheets("Log Details").Columns("H").WrapText = True
 Sheets("Log Details").Columns("H").Rows.AutoFit
 Sheets("Log Details").Rows.VerticalAlignment = xlVAlignCenter
-End If
 
 End Sub
 
@@ -60,11 +106,20 @@ End Sub
 Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Range)
 'skips error if selecting multiple cells (doesn't end script)
 On Error Resume Next
-'doesn't run script if selecting more than 1 cell
-If Target.Count > 1 Then Exit Sub
+
+'if selecting more than 1 cell update address to target range
+If Target.Count > 1 Then
+
+    oldAddress = Target.Address
+    
+End If
+
 'if selecting 1 cell update global variables
 If Target.Count = 1 Then
-oldValue = Target.Value
+
+    oldValue = Target.Value
+    oldAddress = Target.Address
+    
 End If
-oldAddress = Target.Address
+
 End Sub
