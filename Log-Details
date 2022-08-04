@@ -5,18 +5,30 @@ Dim oldAddress As String
 'sheet update function
 Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
 Dim sSheetName As String
-
+Dim cel As Range
+Dim emp As Boolean
 'define active sheet
 sSheetName = ActiveSheet.Name
 
 'if editing multiple cells
 If Target.Cells.Count > 1 Then
-    
+
     'do not track changes to Log Details sheet
     If sSheetName <> "Log Details" Then
     
         'halt all external events during script
         Application.EnableEvents = False
+    
+        emp = True
+    
+        'check if any cells changed value, exit if none change
+        For Each cel In Target.Cells
+            If cel.Value <> "" Then
+                emp = False
+            End If
+        Next cel
+        
+        If emp = True Then Exit Sub
         
         'set values into correct ranges, target.address takes the string range instead of string origin cell
         Sheets("Log Details").Range("A" & Rows.Count).End(xlUp).Offset(1, 0).Value = sSheetName & " - " & Target.Address(False, False)
@@ -104,18 +116,17 @@ End Sub
 
 'cell selection function, runs after update function (oldValue and oldAddress updated after cell values are changed)
 Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Range)
-'skips error if selecting multiple cells (doesn't end script)
+Dim valArray As Variant
 On Error Resume Next
 
-'if selecting more than 1 cell update address to target range
-If Target.Count > 1 Then
-
+'if selecting more than 1 cell update value array to the target values and old address to target range
+If Target.Cells.Count > 1 Then
     oldAddress = Target.Address
     
 End If
 
 'if selecting 1 cell update global variables
-If Target.Count = 1 Then
+If Target.Cells.Count = 1 Then
 
     oldValue = Target.Value
     oldAddress = Target.Address
