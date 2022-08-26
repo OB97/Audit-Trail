@@ -13,7 +13,6 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     Dim sSheetName As String
     Dim inp As String
     Dim cel As Range 'cell
-    Dim newTempArr As String
     'set active sheet
     sSheetName = ActiveSheet.Name
     
@@ -27,7 +26,6 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
         'multiple cell edit
         If Target.Cells.Count > 1 Then
         
-            tempArr = ""
             selArr = "" 'selArr gets reset every change
             'iterate through target values adding to selected array
             For Each cel In Target
@@ -177,6 +175,7 @@ Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Ra
         
             'check cells for values, found values are added to selArr
             selArr = "" 'selArray is reset with every new selection
+            oldFormattedArr = ""
             
             'iterate through target adding non-blank values to selected array
             For Each cel In Target
@@ -198,12 +197,6 @@ Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, ByVal Target As Ra
             
         'select one cell
         Else
-        
-            'not log details
-            If sSheetName = "Log Details" Then
-                Application.EnableEvents = True
-                Exit Sub
-            End If
             
             'set variables
             oldVal = Target.Value
